@@ -50,10 +50,13 @@ public class MyServer {
 
     public synchronized void subscribe(ClientHandler handler) {
         clients.add(handler);
+
+        updateUserList(handler);
     }
 
     public synchronized void unSubscribe(ClientHandler handler) {
         clients.remove(handler);
+        updateUserList(handler);
     }
 
     public AuthenticationService getAuthenticationService() {
@@ -86,7 +89,6 @@ public class MyServer {
     }
 
 
-
     public synchronized void sendPrivateMessage(ClientHandler sender, String recipient, String privateMessage) throws IOException {
         for (ClientHandler client : clients) {
             if (client.getUsername().equals(recipient)) {
@@ -101,6 +103,22 @@ public class MyServer {
                 continue;
             }
             client.sendServerMessage(message);
+        }
+    }
+
+
+    public synchronized void updateUserList(ClientHandler sender) {
+        String str = "";
+        for (ClientHandler client : clients) {
+            str += " " + client.getUsername();
+        }
+        for (ClientHandler client : clients) {
+            try {
+                System.out.println(client.getUsername() + ": " + str);
+                client.sendUserList(str);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
