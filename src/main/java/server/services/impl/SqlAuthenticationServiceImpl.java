@@ -8,8 +8,6 @@ public class SqlAuthenticationServiceImpl implements AuthenticationService {
         return null;
     }
 
-    @Override
-    public String getUserList() {
-        return null;
-    }
+
+
 }

@@ -26,12 +26,5 @@ public class SimpleAuthenticationServiceImpl implements AuthenticationService {
         return null;
     }
 
-    @Override
-    public String getUserList() {
-        String str = "";
-        for (User client : clients) {
-            str += " " + client.getUsername();
-        }
-        return str;
-    }
+
 }

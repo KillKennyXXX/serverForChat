@@ -1,6 +1,7 @@
 package server.handlers;
 
 import server.MyServer;
+import server.models.User;
 import server.services.AuthenticationService;
 
 import java.io.DataInputStream;
@@ -15,7 +16,8 @@ public class ClientHandler {
     private static final String AUTHERR_CMD_PREFIX = "/autherr"; // + error message
     private static final String CLIENT_MSG_CMD_PREFIX = "/cMsg"; // + msg
     private static final String SERVER_MSG_CMD_PREFIX = "/sMsg"; // + msg
-    private static final String PRIVATE_MSG_CMD_PREFIX = "/w"; // + username + msg
+    private static final String SERVER_ADD_USERS_LIST_PREFIX = "/add"; // + msg
+    private static final String PRIVATE_MSG_CMD_PREFIX = "/pm"; // + username + msg
     private static final String STOP_SERVER_CMD_PREFIX = "/stop";
     private static final String END_CLIENT_CMD_PREFIX = "/end";
     private MyServer myServer;
@@ -82,7 +84,7 @@ public class ClientHandler {
         String password = parts[2];
 
         AuthenticationService auth = myServer.getAuthenticationService();
-        auth.getUserList();
+
 
         username = auth.getUsernameByLoginAndPassword(login, password);
 
@@ -105,6 +107,8 @@ public class ClientHandler {
         }
     }
 
+
+
     private void readMessage() throws IOException {
         while (true) {
             String message = in.readUTF();
@@ -122,14 +126,16 @@ public class ClientHandler {
                 case END_CLIENT_CMD_PREFIX -> closeConnection();
                 case CLIENT_MSG_CMD_PREFIX -> {
                     String[] messageParts = message.split("\\s+", 2);
-                    myServer.broadcastMessage(this, messageParts[1]);}
+                    myServer.broadcastMessage(this, messageParts[1]);
+                }
                 case PRIVATE_MSG_CMD_PREFIX -> {
                     String[] privateMessageParts = message.split("\\s+", 3);
-                    String recipient  = privateMessageParts[1];
-                    String privateMessage  = privateMessageParts[2];
+                    String recipient = privateMessageParts[1];
+                    String privateMessage = privateMessageParts[2];
 
                     myServer.sendPrivateMessage(this, recipient, privateMessage);
-                } default -> System.out.println("Неверная команда");
+                }
+                default -> System.out.println("Неверная команда");
             }
 
         }
@@ -146,16 +152,21 @@ public class ClientHandler {
 
     public void sendMessage(String sender, String message, Boolean isPrivate) throws IOException {
         out.writeUTF(String.format("%s %s %s", isPrivate ?
-                PRIVATE_MSG_CMD_PREFIX
-                : CLIENT_MSG_CMD_PREFIX,
+                        PRIVATE_MSG_CMD_PREFIX
+                        : CLIENT_MSG_CMD_PREFIX,
                 sender, message));
     }
 
     public void sendMessage(String sender, String message) throws IOException {
         sendMessage(sender, message, false);
     }
+    public void sendUserList(String message) throws IOException {
+        out.writeUTF(String.format("%s%s", SERVER_ADD_USERS_LIST_PREFIX, message));
+            }
 
     public String getUsername() {
         return username;
     }
+
+
 }
